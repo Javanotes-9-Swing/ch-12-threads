@@ -1,5 +1,8 @@
 import utility.TextIO;
 
+import javax.sound.midi.Soundbank;
+import java.util.SortedMap;
+
 public class ThreadUnsafeCounter {
 
 	private int bigCount;
@@ -7,7 +10,7 @@ public class ThreadUnsafeCounter {
 
 	public static void main(String[] args) {
 
-		ThreadUnsafeCounter.Counter counterClass = new ThreadUnsafeCounter.Counter();
+		counterClass = new Counter();
 
 		int processors = Runtime.getRuntime().availableProcessors();
 		if (processors == 1)
@@ -33,6 +36,7 @@ public class ThreadUnsafeCounter {
 		// - Each thread needs to call counterClass.inc()
 		// - Print the final value of the counter once all threads have terminated
 		System.out.println("Total number of increments was " + counterClass.getCount());
+		System.out.println("Expected: " + numberOfThreads * incs);
 	}
 
 	/**
@@ -78,7 +82,7 @@ public class ThreadUnsafeCounter {
 
 	static class Counter {
 		int count;
-		void inc() {
+		synchronized void inc() {
 			count = count+1;
 		}
 		int getCount() {
