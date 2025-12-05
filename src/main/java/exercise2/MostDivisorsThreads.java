@@ -5,25 +5,20 @@ import utility.TextIO;
 public class MostDivisorsThreads {
 
 	/**
-	 * The starting point for the range of integers that are tested for number of divisors.
-	 * The range is from (start+1) to (2*start).  Note the value of start is chosen
-	 * to be divisible by 2, 3, 4, 5, and 6 to make it easy to divide up the range
-	 * among the threads.
+	 *  Some number found in a range has the largest number of possible divisors
 	 */
-	private static final int START = 100000;
-
 	static int largestNumDivs;
+
+	/**The number that has the greatest number of divisors*/
 	static int maxNum;
 
 	/**
-	 * A Thread belonging to this class will count primes in a specified range
+	 * A Thread belonging to this class will count divisors in a specified range
 	 * of integers.  The range is from min to max, inclusive, where min and max
 	 * are given as parameters to the constructor.  After counting, the thread
-	 * outputs a message about the number of primes that it has found, and it
-	 * adds its count to the overall total by calling the addToTotal(int) method.
+	 * outputs a message about the number of divisors that it has found.
 	 */
 	private class CountDivisorsThread extends Thread {
-		int range;
 		MostDivisors mostDivisors;
 		int min, max;
 		public CountDivisorsThread(int min, int max) {
@@ -32,8 +27,12 @@ public class MostDivisorsThreads {
 		}
 		public void run() {
 			mostDivisors = calculateNumAndDivisors(min, max);
-			largestNumDivs = mostDivisors.getMaxDivisors();
-			maxNum = mostDivisors.getNumWithMax();
+			int maxDivisors = mostDivisors.getMaxDivisors();
+			if (maxDivisors > largestNumDivs) {
+				largestNumDivs = maxDivisors;
+				maxNum = mostDivisors.getNumWithMax();
+			}
+
 		}
 	}
 
@@ -43,13 +42,12 @@ public class MostDivisorsThreads {
 	 * @param numberOfThreads
 	 */
 	private void incrementWithThreads(int numberOfThreads, int range) {
-		int increment = range/numberOfThreads; //TODO: The range needs to be split up so the given
-				//ToDO: number of threads find divisors for an equal portion of the range.
-		System.out.println("\nCounting divisors between " + (range+1) + " and "
-				+ (2*range) + " using " + numberOfThreads + " threads...\n");
+		int increment = range/numberOfThreads;
+		System.out.println("\nCounting divisors between " + (1) + " and "
+				+ range + " using " + numberOfThreads + " threads...\n");
 		CountDivisorsThread[] worker = new CountDivisorsThread[numberOfThreads];
 		for (int i = 0; i < numberOfThreads; i++) {
-			worker[i] = new CountDivisorsThread( range+i*increment+1, range+(i+1)*increment );
+			worker[i] = new CountDivisorsThread((increment * i) + 1, increment * (i + 1) );
 		}
 
 		for (int i = 0; i < numberOfThreads; i++) {
@@ -136,7 +134,7 @@ public class MostDivisorsThreads {
 
 		System.out.print("What number of numbers to find divisors for?  ");
 		rangeNums = TextIO.getlnInt();
-		
+
 		MostDivisorsThreads mostDivsClass = new MostDivisorsThreads();
 		mostDivsClass.incrementWithThreads(numberOfThreads, rangeNums);
 		System.out.println("Among integers between 1 and " + rangeNums);
