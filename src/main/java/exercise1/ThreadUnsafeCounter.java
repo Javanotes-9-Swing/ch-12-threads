@@ -1,7 +1,6 @@
-import utility.TextIO;
+package exercise1;
 
-import javax.sound.midi.Soundbank;
-import java.util.SortedMap;
+import utility.TextIO;
 
 public class ThreadUnsafeCounter {
 

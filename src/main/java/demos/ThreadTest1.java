@@ -1,3 +1,5 @@
+package demos;
+
 import utility.TextIO;
 
 /**
@@ -80,5 +82,5 @@ public class ThreadTest1 {
     }
 
 
-} // end class ThreadTest1
+} // end class demos.ThreadTest1
 
