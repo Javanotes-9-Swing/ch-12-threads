@@ -91,9 +91,9 @@ public class MostDivisorsThreads {
 		}
 	}
 
-	public class MostDivisors {
-		private int maxDivisors;
-		private int numWithMax;
+	public static class MostDivisors {
+		private final int maxDivisors;
+		private final int numWithMax;
 
 		public MostDivisors(int maxDivisors, int numWithMax) {
 			this.maxDivisors = maxDivisors;
