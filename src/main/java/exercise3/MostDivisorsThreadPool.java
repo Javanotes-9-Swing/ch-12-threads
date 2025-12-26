@@ -2,6 +2,7 @@ package exercise3;
 
 import demos.MultiprocessingDemo2;
 import exercise2.MostDivisorsThreads;
+import utility.TextIO;
 
 import javax.swing.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -40,7 +41,7 @@ public class MostDivisorsThreadPool {
 	ConcurrentLinkedQueue<Runnable> taskQueue = new ConcurrentLinkedQueue<>();
 
 	/** The resultQueue holds MostDivisors results.*/
-	private LinkedBlockingQueue<MostDivisors> resultQueue;
+	private final LinkedBlockingQueue<MostDivisors> resultQueue = new LinkedBlockingQueue<>();
 
 	/**
 	 * how many threads have not yet terminated?
@@ -57,24 +58,55 @@ public class MostDivisorsThreadPool {
 	 */
 	private int threadCountSelect;
 
-	public static void main(String[] args) {
+	private static int theNum = 0;
+	private static int numDivisors = 0;
 
-		/*
-			TODO: Add stuff to get from user number to run divisor task on. Consider using GUI stuff
-				from MultiprocessingDemo3 as guide/inspiration.
-		 */
+	public static void main(String[] args) throws InterruptedException {
 
-		getMostDivisorsResult();
+		//Let user know how many processors there are.
+		//Let user choose how many threads to create for the pool.
+		int processors = Runtime.getRuntime().availableProcessors();
+		if (processors == 1) {
+			System.out.println("Your computer has only 1 available processor.\n");
+		} else {
+			System.out.println("Your computer has " + processors + " available processors.\n");
+		}
+		int numberOfThreads = 0;
+		int rangeNums = 1;
+		while (numberOfThreads < 1 || numberOfThreads > (processors * 2)) {
+			System.out.print("How many threads do you want to use  (from 1 to " + processors * 2 + ") ?  ");
+			numberOfThreads = TextIO.getlnInt();
+			if (numberOfThreads < 1 || numberOfThreads > processors * 2) {
+				System.out.println("Please enter a number from 1 to " + processors * 2 + ".");
+			}
+		}
+
+		System.out.print("What number of numbers to find divisors for?  ");
+		rangeNums = TextIO.getlnInt();
+
+		MostDivisorsThreadPool topClass = new MostDivisorsThreadPool();
+
+		topClass.startMostDivisorsWork(rangeNums, numberOfThreads);// Start the processing.
+		topClass.getMostDivisorsResult(rangeNums);
+
+		System.out.println("Among integers between 1 and " + rangeNums);
+		System.out.println("Elapsed time: ");
+		System.out.println("The maximum number of divisors is " + numDivisors);
+		System.out.println("The first number found with " + numDivisors + " divisors was " + theNum);
 	}
 
 	/**
-	 *TODO: Loop through the resultQueue comparing number of divisors. Update the maxDivisor variable
-	 *  until the loop finishes. We know how many results there will be because we know the number
-	 *  that was originally given.
+	 * Loop through the resultQueue comparing number of divisors. Update the maxDivisor variable
+	 * until the loop finishes. We know how many results there will be because we know the number
+	 * that was originally given.
 	 */
-	private static void getMostDivisorsResult() {
-		for (int i = 0; i < 10000; i++) {
-			System.out.println(i);
+	private void getMostDivisorsResult(int rangeNums) throws InterruptedException {
+		for (int i = 0; i < rangeNums; i++) {
+			MostDivisors md = this.resultQueue.take();
+			if (md.getMaxDivisors() > numDivisors) {
+				numDivisors = md.getMaxDivisors();
+				theNum = md.getNumWithMax();
+			}
 		}
 	}
 
@@ -107,34 +139,8 @@ public class MostDivisorsThreadPool {
 	}
 
 	public MostDivisors calculateDivisorsOfNum(int aNumFromTheRange) {
-		int maxDivisors;  // Maximum number of divisors seen so far.
-		int numWithMax;   // A value of N that had the given number of divisors.
-		maxDivisors = 1;
-		numWithMax = 1;
-		int N;            // One of the integers whose divisors we have to count.
-
-		/* Process all the remaining values of N from 2 to 10000, and
-          update the values of maxDivisors and numWithMax whenever we
-          find a value of N that has more divisors than the current value
-          of maxDivisors.
-       */
-
-		for (N = 0; N <= aNumFromTheRange; N++) {
-
-//			int D;  // A number to be tested to see if it's a divisor of N.
-//			int divisorCount;  // Number of divisors of N.
-//
-//			divisorCount = 0;
-
-			int divisorCount = calculateDivisorCount(N);
-
-			if (divisorCount > maxDivisors) {
-				maxDivisors = divisorCount;
-				numWithMax = N;
-			}
-		}
-
-		return new MostDivisors(maxDivisors, numWithMax);
+		int divisorCount = calculateDivisorCount(aNumFromTheRange);
+		return new MostDivisors(divisorCount, aNumFromTheRange);
 	}
 
 	/**
@@ -154,14 +160,13 @@ public class MostDivisorsThreadPool {
 		return divisorCount;
 	}
 
-
 	/**
 	 * Worker threads remove tasks from a ConcurrentLinkedQueue and invoked the task to get a result.
 	 */
 	private class WorkerThread extends Thread {
 		public void run() {
 			try {
-				while (true) { //TODO: true may be replaced with running variable
+				while (true) {
 					Runnable task = taskQueue.poll(); // Get a task from the taskQueue.
 					if (task == null)
 						break; // (because the queue is empty)
@@ -186,18 +191,14 @@ public class MostDivisorsThreadPool {
 		}
 	}
 
-	private void startMostDivisorsWork() {
+	private void startMostDivisorsWork(int numRange, int threadCount) {
 		taskQueue = new ConcurrentLinkedQueue<Runnable>();
 
-		//TODO: Create however many MostDivisor tasks and add them to the taskQueue.
-		for (int i = 0; i < 10000; i++) {
-			MostDivisors task = new MostDivisors(i);//TODO: Do we add task but not result here?
+		//Create numRange of MostDivisor tasks and add them to the taskQueue.
+		for (int i = 1; i <= numRange; i++) {
+			MostDivisors task = new MostDivisors(i);
 			taskQueue.add(task);
 		}
-
-		int threadCount = 12;
-		if (threadCount == 11)
-			threadCount = 20;
 		workers = new WorkerThread[threadCount];
 //		running = true; // Set the signal before starting the threads!
 		threadsRunning = threadCount; // Records how many of the threads have not yet terminated.
