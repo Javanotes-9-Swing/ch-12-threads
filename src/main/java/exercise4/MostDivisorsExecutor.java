@@ -14,14 +14,17 @@ import java.util.concurrent.LinkedBlockingQueue;
  work through all numbers from 1 to 10,000 to determine which number within that range has the most
  divisors.
  </p>
+ <p>An ExecutorService is used to do the work of creating a thread pool and a LinkedBlockingQueue
+ into which MostDivisors tasks will be added. ExecutorService is also used to get the tasks and invoke them.</p>
+ <p>Results of tasks, in the form of MostDivisors will be added to LinkedBlockingQueue to wait for processing.</p>
  */
 public class MostDivisorsExecutor {
 
-	/**
+	/*
 	 * This queue holds all the tasks to be performed by the pool of threads. It's a Runnable type
 	 * instead of MostDivisors so that the thread simply needs to call the run method to call the task.
 	 */
-	ConcurrentLinkedQueue<Runnable> taskQueue = new ConcurrentLinkedQueue<>();
+//	ConcurrentLinkedQueue<Runnable> taskQueue = new ConcurrentLinkedQueue<>();
 
 	/** The executor that executes the MostDivisors.
 	 When a job is started, an executor is created to
@@ -40,7 +43,7 @@ public class MostDivisorsExecutor {
 	/**
 	 * The threads that compute MostDivisors objects.
 	 */
-	private WorkerThread[] workers;
+//	private WorkerThread[] workers;
 
 	/**
 	 * for specifying the number of threads to be used
@@ -75,11 +78,15 @@ public class MostDivisorsExecutor {
 
 		MostDivisorsExecutor topClass = new MostDivisorsExecutor();
 
+		long elapsedTime;
+		long startTime = System.currentTimeMillis();
 		topClass.startMostDivisorsWork(rangeNums, numberOfThreads);// Start the processing.
 		topClass.getMostDivisorsResult(rangeNums);
+		long endTime = System.currentTimeMillis();
+		elapsedTime = (endTime - startTime)/1000;
 
 		System.out.println("Among integers between 1 and " + rangeNums);
-		System.out.println("Elapsed time: ");
+		System.out.println("Elapsed time: " + elapsedTime);
 		System.out.println("The maximum number of divisors is " + numDivisors);
 		System.out.println("The first number found with " + numDivisors + " divisors was " + theNum);
 	}
@@ -90,6 +97,7 @@ public class MostDivisorsExecutor {
 	 * that was originally given.
 	 */
 	private void getMostDivisorsResult(int rangeNums) throws InterruptedException {
+
 		for (int i = 0; i < rangeNums; i++) {
 			MostDivisors md = this.resultQueue.take();
 			if (md.getMaxDivisors() > numDivisors) {
@@ -152,21 +160,6 @@ public class MostDivisorsExecutor {
 	/**
 	 * Worker threads remove tasks from a ConcurrentLinkedQueue and invoked the task to get a result.
 	 */
-	private class WorkerThread extends Thread {
-		public void run() {
-			try {
-				while (true) {
-					Runnable task = taskQueue.poll(); // Get a task from the taskQueue.
-					if (task == null)
-						break; // (because the queue is empty)
-					task.run();  // Execute the task to get a MostDivisors object as result;
-				}
-			} finally {
-				threadFinished(); // Records fact that this thread has terminated.
-				// Done in finally to make sure it gets called.
-			}
-		}
-	}
 
 	/**
 	 * This method is called by each thread when it terminates. We keep track
@@ -181,24 +174,13 @@ public class MostDivisorsExecutor {
 	}
 
 	private void startMostDivisorsWork(int numRange, int threadCount) {
-//		taskQueue = new ConcurrentLinkedQueue<Runnable>();
 		executor = Executors.newFixedThreadPool(threadCount);
 
-		//Create numRange of MostDivisor tasks and add them to the taskQueue.
+		//Create numRange of MostDivisor tasks and execute the tasks
 		for (int i = 1; i <= numRange; i++) {
 			MostDivisors task = new MostDivisors(i);
 			executor.execute(task);
 		}
-		workers = new WorkerThread[threadCount];
-//		running = true; // Set the signal before starting the threads!
-		threadsRunning = threadCount; // Records how many of the threads have not yet terminated.
-		for (int i = 0; i < threadCount; i++) {
-			workers[i] = new WorkerThread();
-			try {
-				workers[i].setPriority(Thread.currentThread().getPriority() - 1);
-			} catch (Exception ignored) {
-			}
-			workers[i].start();
-		}
+		executor.shutdown();
 	}
 }

@@ -20,7 +20,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version> <!-- Use a recent version -->
                 <configuration>
-                    <mainClass>exercise3.MostDivisorsThreadPool</mainClass>
+                    <mainClass>exercise4.MostDivisorsExecutor</mainClass>
 <!--                    <mainClass>demos.MultiprocessingDemo2</mainClass>-->
                     <!-- Optional: Add arguments if your main method accepts them -->
                     <!-- <arguments>
