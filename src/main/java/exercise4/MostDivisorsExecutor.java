@@ -3,10 +3,8 @@ package exercise4;
 import exercise2.MostDivisorsThreads;
 import utility.TextIO;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.ArrayList;
+import java.util.concurrent.*;
 
 /**
  <p>
@@ -63,6 +61,10 @@ public class MostDivisorsExecutor {
 		} else {
 			System.out.println("Your computer has " + processors + " available processors.\n");
 		}
+		System.out.println("This program breaks up the computation into a number of tasks.");
+		System.out.println("For load balancing, the number of tasks should be at least");
+		System.out.println("several times the number of processors.  (Try 100 tasks.)");
+		System.out.println();
 		int numberOfThreads = 0;
 		int rangeNums = 1;
 		while (numberOfThreads < 1 || numberOfThreads > (processors * 2)) {
@@ -86,7 +88,7 @@ public class MostDivisorsExecutor {
 		elapsedTime = (endTime - startTime)/1000;
 
 		System.out.println("Among integers between 1 and " + rangeNums);
-		System.out.println("Elapsed time: " + elapsedTime);
+		System.out.println("Elapsed time: " + elapsedTime + " seconds.");
 		System.out.println("The maximum number of divisors is " + numDivisors);
 		System.out.println("The first number found with " + numDivisors + " divisors was " + theNum);
 	}
@@ -173,14 +175,29 @@ public class MostDivisorsExecutor {
 		}
 	}
 
-	private void startMostDivisorsWork(int numRange, int threadCount) {
-		executor = Executors.newFixedThreadPool(threadCount);
+	private void startMostDivisorsWork(int numRange, int numberOfTasks) {
 
-		//Create numRange of MostDivisor tasks and execute the tasks
-		for (int i = 1; i <= numRange; i++) {
-			MostDivisors task = new MostDivisors(i);
-			executor.execute(task);
+		System.out.println("\nCounting divisors between " + (1) + " and "
+				+ (numRange) + " using " + numberOfTasks + " tasks...\n");
+		long startTime = System.currentTimeMillis();
+
+		double increment = (double) numRange / numberOfTasks;
+
+		int processors = Runtime.getRuntime().availableProcessors();
+		executor = Executors.newFixedThreadPool(processors);
+
+		/* An ArrayList used to store the Futures that are created when the tasks
+		 * are submitted to the ExecutorService. */
+		ArrayList<Future<Integer>> results = new ArrayList<>();
+
+		/* Create the subtasks, add them to the executor, and save the Futures. */
+		int min = 1; // The start of the range of integers for one subtask.
+		int max;     // The end of the range of integers for one subtask.
+		for (int i = 0; i < numberOfTasks; i++) {
+			max = (int) (min + 1 + (i + 1) * increment);
+			if (i == numberOfTasks - 1) {
+				max = numRange;
+			}
 		}
-		executor.shutdown();
 	}
 }
