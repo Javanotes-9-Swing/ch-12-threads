@@ -1,21 +1,38 @@
 package exercise4;
 
-import exercise2.MostDivisorsThreads;
-import utility.TextIO;
-
-import java.util.ArrayList;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
 
 /**
- <p>
- Find the number with the most divisors, when given a number. For example, if given the number 10,000,
- work through all numbers from 1 to 10,000 to determine which number within that range has the most
- divisors.
- </p>
- <p>An ExecutorService is used to do the work of creating a thread pool and a LinkedBlockingQueue
- into which MostDivisors tasks will be added. ExecutorService is also used to get the tasks and invoke them.</p>
- <p>Results of tasks, in the form of MostDivisors will be added to LinkedBlockingQueue to wait for processing.</p>
+ * <p>
+ * Tasks for an ExecutorService can be represented by objects of type Callable<T>, which is a parameterized functional interface that defines the method call() with no parameters and a return type of T. A Callable represents a task that outputs a value.
+ * </p>
+ * <p>The interface, Future<T>, gets the result of the computation when it completes. The Callable return type of T represents a value that might not be available until some future time. The method executor.submit(c) returns a Future that represents the result of the future computation.</p>
+ * <p></p>
  */
 public class MostDivisorsExecutor {
 
+    /**
+     * An object belonging to this class will count divisors for each integer in a specified range of integers.  The range is from min to max, inclusive, where min and max are given as parameters to the constructor.  The counting is done in the call() method, which returns the number of primes that were found.
+     */
+    private static class MostDivisors implements Callable<MostDivisors> {
+        int min, max;
+
+        public MostDivisors(int min, int max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        @Override
+        public MostDivisors call() {
+            MostDivisors md = calculateDivisorsOfNum(min, max);
+            return md;
+        }
+
+        /**
+         * Count the divisors between min and max, inclusive.
+         */
+        private MostDivisors calculateDivisorsOfNum(int min, int max) {
+            return null;
+        }
+    }
 }
