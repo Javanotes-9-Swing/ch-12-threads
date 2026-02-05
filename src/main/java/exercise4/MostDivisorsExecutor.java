@@ -13,11 +13,11 @@ import java.util.concurrent.*;
 public class MostDivisorsExecutor {
 
     static void main() {
-        int numberOfTasks = 10;
-        countDivisorsWithExecutor(numberOfTasks);
+        int numberOfTasks = 100;
+        countDivisorsWithExecutor(numberOfTasks, 100000);
     }
 
-    private static void countDivisorsWithExecutor(int numberOfTasks) {
+    private static void countDivisorsWithExecutor(int numberOfTasks, int theNumber) {
         int processors = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(processors);
 
@@ -25,9 +25,17 @@ public class MostDivisorsExecutor {
          * are submitted to the ExecutorService. */
         ArrayList<Future<MostDivisors>> results = new ArrayList<>();
 
-        MostDivisors aTask = new MostDivisors(23, 89);
-        Future<MostDivisors> aResult = executor.submit(aTask);
-        results.add(aResult); // Save the Future representing the (future) result.
+        int theChunk = theNumber/numberOfTasks;
+        int min = 1;
+        int max = theChunk;
+
+        for (int i = 1; i <= numberOfTasks; i++) {
+            MostDivisors aTask = new MostDivisors(min, max);
+            Future<MostDivisors> aResult = executor.submit(aTask);
+            results.add(aResult); // Save the Future representing the (future) result.
+            min = max + 1;
+            max = theChunk * i;
+        }
 
         int maxMax = 0;
         int maxMaxNum =0;
@@ -41,7 +49,7 @@ public class MostDivisorsExecutor {
                 }
             } catch (Exception e) {
                 // Should not occur in this program.  An exception can
-                // be thrown if the task was cancelled, if an exception
+                // be thrown if the task was canceled, if an exception
                 // occurred while the task was computing, or if the
                 // thread that is waiting on get() is interrupted.
                 System.out.println("Error occurred while computing: " + e);
@@ -85,6 +93,7 @@ public class MostDivisorsExecutor {
 
             // loop from min to max getting each int
             short maxDivs = (short) Integer.MIN_VALUE;
+            short theNum = 0;
             for (int i = min; i <= max; i++) {
                 // find the num divisors of each int
                 short divCount = 0;
@@ -95,12 +104,11 @@ public class MostDivisorsExecutor {
                 }
                 if (divCount > maxDivs) {
                     maxDivs = divCount;
+                    theNum = (short) i;
                 }
             }
-
             // keep track of max divisors
-
-            return new MostDivisors(maxDivs, theNumDivided);
+            return new MostDivisors(maxDivs, theNum);
         }
     }
 }
