@@ -1,5 +1,7 @@
 package exercise4;
 
+import utility.TextIO;
+
 import java.util.ArrayList;
 import java.util.concurrent.*;
 
@@ -12,13 +14,34 @@ import java.util.concurrent.*;
  */
 public class MostDivisorsExecutor {
 
-    static void main() {
-        int numberOfTasks = 100;
-        countDivisorsWithExecutor(numberOfTasks, 100000);
+   public static void main(String[] args) {
+        int processors = Runtime.getRuntime().availableProcessors();
+        if (processors == 1)
+            System.out.println("Your computer has only 1 available processor.\n");
+        else
+            System.out.println("Your computer has " + processors + " available processors.\n");
+        System.out.println("This program breaks up the computation into a number of tasks.");
+        System.out.println("For load balancing, the number of tasks should be at least");
+        System.out.println("several times the number of processors.  (Try 100 tasks.)");
+        System.out.println();
+        int numberOfTasks=0;
+        while (numberOfTasks < 1 || numberOfTasks > 1000) {
+            System.out.print("How many tasks do you want to use  (from 1 to 1000) ?  ");
+            numberOfTasks = TextIO.getlnInt();
+            if (numberOfTasks < 1 || numberOfTasks > 1000)
+                System.out.println("Please enter a number in the range 1 to 1000 !");
+        }
+        System.out.println("Choose a number that's at least 10.");
+        int chosenNumber = TextIO.getlnInt();
+        System.out.println("The number of divisors for 1 up to the chosen number " + chosenNumber + ", will be found.");
+        countDivisorsWithExecutor(numberOfTasks, chosenNumber);
     }
 
     private static void countDivisorsWithExecutor(int numberOfTasks, int theNumber) {
-        int processors = Runtime.getRuntime().availableProcessors();
+
+        long startTime = System.currentTimeMillis();
+
+       int processors = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(processors);
 
         /* An ArrayList used to store the Futures that are created when the tasks
@@ -37,12 +60,14 @@ public class MostDivisorsExecutor {
             max = theChunk * i;
         }
 
-        int maxMax = 0;
-        int maxMaxNum =0;
+        executor.shutdown();
+
+        long maxMax = 0;
+        long maxMaxNum =0;
         for (Future<MostDivisors> res : results) {
             try {
                 int maxDiv = res.get().maxDiv;
-                int theNum = res.get().theNumDivided;
+                long theNum = res.get().theNumDivided;
                 if (maxDiv > maxMax) {
                     maxMaxNum = theNum;
                     maxMax = maxDiv;
@@ -55,10 +80,10 @@ public class MostDivisorsExecutor {
                 System.out.println("Error occurred while computing: " + e);
             }
         }
+        long elapsedTime = System.currentTimeMillis() - startTime;
         System.out.println(maxMax + " is the number of divisors.");
         System.out.println(maxMaxNum + " is the number with most divisors.");
-
-        executor.shutdown();
+        System.out.println("\nTotal elapsed time:  " + (elapsedTime/1000.0) + " seconds.\n");
 
     }
 
@@ -69,14 +94,14 @@ public class MostDivisorsExecutor {
         int min, max;
 
         int maxDiv = 0;
-        int theNumDivided = 0;
+        long theNumDivided = 0;
 
         public MostDivisors(int min, int max) {
             this.min = min;
             this.max = max;
         }
 
-        public MostDivisors(short maxDiv, short theNumDivided) {
+        public MostDivisors(int maxDiv, long theNumDivided) {
             this.maxDiv = maxDiv;
             this.theNumDivided = theNumDivided;
         }
@@ -92,11 +117,11 @@ public class MostDivisorsExecutor {
         private MostDivisors calculateDivisorsOfNum(int min, int max) {
 
             // loop from min to max getting each int
-            short maxDivs = (short) Integer.MIN_VALUE;
-            short theNum = 0;
+            int maxDivs = Integer.MIN_VALUE;
+            long theNum = 0;
             for (int i = min; i <= max; i++) {
                 // find the num divisors of each int
-                short divCount = 0;
+                int divCount = 0;
                 for (int j = 1; j <= i; j++) {
                     if (i % j == 0) {
                         divCount++;
@@ -104,7 +129,7 @@ public class MostDivisorsExecutor {
                 }
                 if (divCount > maxDivs) {
                     maxDivs = divCount;
-                    theNum = (short) i;
+                    theNum = i;
                 }
             }
             // keep track of max divisors
