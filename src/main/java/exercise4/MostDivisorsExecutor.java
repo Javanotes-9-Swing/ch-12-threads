@@ -53,13 +53,12 @@ public class MostDivisorsExecutor {
         int max = theChunk;
 
         for (int i = 1; i <= numberOfTasks; i++) {
+            if (i == numberOfTasks && max < theNumber){
+                min = max + 1;
+                max = theNumber;
+            }
             MostDivisors aTask = new MostDivisors(min, max);
             Future<MostDivisors> aResult = executor.submit(aTask);
-            try {
-                System.out.println("Currently adding the number " + aResult.get().theNumDivided);
-            } catch (ExecutionException | InterruptedException e) {
-                System.out.println("Error occurred while printing results as they were available: " + e);
-            }
             results.add(aResult); // Save the Future representing the (future) result.
             min = max + 1;
             max = theChunk * i;
@@ -71,6 +70,7 @@ public class MostDivisorsExecutor {
         long maxMaxNum = 0;
         for (Future<MostDivisors> res : results) {
             try {
+                System.out.println("Currently adding the number " + res.get().theNumDivided);
                 int maxDiv = res.get().maxDiv;
                 long theNum = res.get().theNumDivided;
                 if (maxDiv > maxMax) {
@@ -113,6 +113,7 @@ public class MostDivisorsExecutor {
 
         @Override
         public MostDivisors call() {
+            System.out.println("The current range being calculated: " + min + ",  " + max);
             return calculateDivisorsOfNum(min, max);
         }
 
@@ -127,13 +128,13 @@ public class MostDivisorsExecutor {
             for (int i = min; i <= max; i++) {
                 // find the num divisors of each int
                 int divCount = 0;
-                for (int j = 1; j <= i; j++) {
+                for (int j = 1; j <= i/2; j++) {
                     if (i % j == 0) {
                         divCount++;
                     }
                 }
                 if (divCount > maxDivs) {
-                    maxDivs = divCount;
+                    maxDivs = divCount + 1;
                     theNum = i;
                 }
             }
