@@ -14,7 +14,7 @@ import java.util.concurrent.*;
  */
 public class MostDivisorsExecutor {
 
-   public static void main(String[] args) {
+    static void main() {
         int processors = Runtime.getRuntime().availableProcessors();
         if (processors == 1)
             System.out.println("Your computer has only 1 available processor.\n");
@@ -24,7 +24,7 @@ public class MostDivisorsExecutor {
         System.out.println("For load balancing, the number of tasks should be at least");
         System.out.println("several times the number of processors.  (Try 100 tasks.)");
         System.out.println();
-        int numberOfTasks=0;
+        int numberOfTasks = 0;
         while (numberOfTasks < 1 || numberOfTasks > 1000) {
             System.out.print("How many tasks do you want to use  (from 1 to 1000) ?  ");
             numberOfTasks = TextIO.getlnInt();
@@ -41,20 +41,25 @@ public class MostDivisorsExecutor {
 
         long startTime = System.currentTimeMillis();
 
-       int processors = Runtime.getRuntime().availableProcessors();
+        int processors = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(processors);
 
         /* An ArrayList used to store the Futures that are created when the tasks
          * are submitted to the ExecutorService. */
         ArrayList<Future<MostDivisors>> results = new ArrayList<>();
 
-        int theChunk = theNumber/numberOfTasks;
+        int theChunk = theNumber / numberOfTasks;
         int min = 1;
         int max = theChunk;
 
         for (int i = 1; i <= numberOfTasks; i++) {
             MostDivisors aTask = new MostDivisors(min, max);
             Future<MostDivisors> aResult = executor.submit(aTask);
+            try {
+                System.out.println("Currently adding the number " + aResult.get().theNumDivided);
+            } catch (ExecutionException | InterruptedException e) {
+                System.out.println("Error occurred while printing results as they were available: " + e);
+            }
             results.add(aResult); // Save the Future representing the (future) result.
             min = max + 1;
             max = theChunk * i;
@@ -63,7 +68,7 @@ public class MostDivisorsExecutor {
         executor.shutdown();
 
         long maxMax = 0;
-        long maxMaxNum =0;
+        long maxMaxNum = 0;
         for (Future<MostDivisors> res : results) {
             try {
                 int maxDiv = res.get().maxDiv;
@@ -83,7 +88,7 @@ public class MostDivisorsExecutor {
         long elapsedTime = System.currentTimeMillis() - startTime;
         System.out.println(maxMax + " is the number of divisors.");
         System.out.println(maxMaxNum + " is the number with most divisors.");
-        System.out.println("\nTotal elapsed time:  " + (elapsedTime/1000.0) + " seconds.\n");
+        System.out.println("\nTotal elapsed time:  " + (elapsedTime / 1000.0) + " seconds.\n");
 
     }
 
