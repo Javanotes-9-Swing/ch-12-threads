@@ -128,13 +128,16 @@ public class MostDivisorsExecutor {
             for (int i = min; i <= max; i++) {
                 // find the num divisors of each int
                 int divCount = 0;
-                for (int j = 1; j <= i/2; j++) {
+                for (int j = 1; j <= Math.sqrt(i); j++) {
                     if (i % j == 0) {
                         divCount++;
+                        if (j != i / j) {
+                            divCount++;
+                        }
                     }
                 }
                 if (divCount > maxDivs) {
-                    maxDivs = divCount + 1;
+                    maxDivs = divCount;
                     theNum = i;
                 }
             }
