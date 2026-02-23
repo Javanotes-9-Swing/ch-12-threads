@@ -3,7 +3,8 @@ package exercise4;
 import utility.TextIO;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.Callable;
 
 
 /**
@@ -15,7 +16,7 @@ import java.util.Arrays;
  */
 public class MostDivisorsStream {
 
-    static void main() {
+    public static void main(String[] args) {
         int processors = Runtime.getRuntime().availableProcessors();
         if (processors == 1)
             System.out.println("Your computer has only 1 available processor.\n");
@@ -62,42 +63,49 @@ public class MostDivisorsStream {
             mostDivisors.add(aTask);
         }
 
-        MostDivisors mdivs;
+        Optional<Result> maxResult;
+        maxResult = mostDivisors.parallelStream()
+                .map((task) -> {
+                    try {
+                        return task.call();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .max(((r1, r2) -> r1.maxDivisorFromTask - r2.maxDivisorFromTask));
 
         long elapsedTime = System.currentTimeMillis() - startTime;
-        System.out.println(min + " is the number of divisors.");
-        System.out.println(max + " is the number with most divisors.");
+        System.out.println(maxResult.get().maxDivisorFromTask + " is the number of divisors.");
+        System.out.println(maxResult.get().theNumWithMaxDivisors + " is the number with most divisors.");
         System.out.println("\nTotal elapsed time:  " + (elapsedTime / 1000.0) + " seconds.\n");
     }
 
     /**
      * An object belonging to this class will count divisors for each integer in a specified range of integers.  The range is from min to max, inclusive, where min and max are given as parameters to the constructor.  The counting is done in the call() method, which returns the number of primes that were found.
      */
-    static class MostDivisors {
+    static class MostDivisors implements Callable<Result> {
         int min, max;
-
-        int maxDiv = 0;
-        long theNumDivided = 0;
 
         public MostDivisors(int min, int max) {
             this.min = min;
             this.max = max;
         }
 
-        public MostDivisors(int maxDiv, long theNumDivided) {
-            this.maxDiv = maxDiv;
-            this.theNumDivided = theNumDivided;
+        @Override
+        public Result call() {
+            System.out.println("The current range being calculated: " + min + ",  " + max);
+            return calculateDivisorsOfNum(min, max);
         }
     }
 
     /**
      * Count the divisors between min and max, inclusive.
      */
-   static MostDivisors calculateDivisorsOfNum(int min, int max) {
+    static Result calculateDivisorsOfNum(int min, int max) {
 
         // loop from min to max getting each int
         int maxDivs = Integer.MIN_VALUE;
-        long theNum = 0;
+        int theNum = 0;
         for (int i = min; i <= max; i++) {
             // find the num divisors of each int
             int divCount = 0;
@@ -115,7 +123,10 @@ public class MostDivisorsStream {
             }
         }
         // keep track of max divisors
-        return new MostDivisors(maxDivs, theNum);
+        return new Result(maxDivs, theNum);
+    }
+
+    private record Result(int maxDivisorFromTask, int theNumWithMaxDivisors) {
     }
 }
 
