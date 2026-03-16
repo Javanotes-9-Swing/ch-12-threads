@@ -20,13 +20,13 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.2.0</version> <!-- Use a recent version -->
                 <configuration>
-                    <mainClass>exercise4.MostDivisorsStream</mainClass>
+                    <mainClass>exercise5.FileServer</mainClass>
 <!--                    <mainClass>demos.MultiprocessingDemo2</mainClass>-->
                     <!-- Optional: Add arguments if your main method accepts them -->
-                    <!-- <arguments>
-                        <argument>arg1</argument>
-                        <argument>arg2</argument>
-                    </arguments> -->
+                    <arguments>
+                        <argument>D:\Catholic</argument>
+<!--                        <argument>arg2</argument>-->
+                    </arguments>
                 </configuration>
             </plugin>
         </plugins>
