@@ -2,7 +2,7 @@ package exercise6;
 
 public class PIApproximator {
 
-    private static final int BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 1000000;
 
     double trialGenerator() {
         long trialCount = 0;
