@@ -103,12 +103,10 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
                 // 'this' refers to the current class instance which implements ActionListener
                 timer = new Timer(delay, this);
                 timer.start(); //TODO: Do I need a timer? If so, where is it called?
-                               // TODO: Where is the timer set up, constructor or method?
+                // TODO: Where is the timer set up, constructor or method?
             }
 
         }
-        piEstimateLabel.setText(" Current Estimate:  " + estimateForPI);
-        countLabel.setText(" Number of trials: " + this.trialCount);
         notify();
     }
 
@@ -123,7 +121,7 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
             checkStatus(); // Returns only when user has clicked "Run"
             try {
                 trialGenerator();
-            } catch (IllegalStateException e) {
+            } catch (IllegalStateException _) {
 
             }
         }
@@ -158,6 +156,8 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
                 inCircleCount++;
         }
         estimateForPI = 4 * ((double) inCircleCount / this.trialCount);
+        piEstimateLabel.setText(" Current Estimate:  " + estimateForPI);
+        countLabel.setText(" Number of trials: " + this.trialCount);
         checkStatus();
     }
 
