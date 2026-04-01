@@ -12,6 +12,7 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
     long trialCount = 0;
     long inCircleCount = 0;
     private Timer timer;
+    private int counter = 0;
 
     private int status;   // Controls the execution of the thread; value is one of the following constants.
 
@@ -62,10 +63,8 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(runPauseButton);
 
-//        // --- Timer Setup ---
-        int delay = 100; // 1000 milliseconds = 1 second
-        // 'this' refers to the current class instance which implements ActionListener
-        timer = new Timer(delay, this);
+        // Timer triggers every 1s
+        timer = new Timer(1000, new TimerActionListener());
 
          /* Use a GridLayout with 4 rows and 1 column, and add all the
           components that have been created to the panel. */
@@ -87,6 +86,22 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
 
     } // end constructor
 
+    // 2. Timer's own action listener
+    class TimerActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Update variable using Runnable
+            Runnable updateLogic = () -> {
+                synchronized (monitor) {
+                    counter++;
+                    System.out.println("Counter: " + counter);
+                    monitor.notify(); // Notify waiting threads
+                }
+            };
+            SwingUtilities.invokeLater(updateLogic);
+        }
+    }
+
     @Override
     synchronized public void actionPerformed(ActionEvent evt) {
 
@@ -100,6 +115,7 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
             } else {  // Animation is paused.  Start it running.
                 status = GO;
                 runPauseButton.setText("Pause");
+                timer.start();
             }
         }
         notify();
@@ -116,11 +132,11 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
             runPauseButton.setText("Run");
             status = PAUSE;
             checkStatus(); // Returns only when user has clicked "Run"
-//            try {
-            trialGenerator();
-//            } catch (IllegalStateException _) {
+            try {
+                trialGenerator();
+            } catch (IllegalStateException _) {
 
-//            }
+            }
         }
     }
 
