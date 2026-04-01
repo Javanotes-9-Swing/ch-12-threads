@@ -46,6 +46,8 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
 
     private PIApproximator piApproximator;
 
+    private final Object monitor = new Object(); // Shared monitor object for wait/notify
+
     public PIApproxGUI() {
 
         PIApproximator approximator = new PIApproximator();
@@ -61,10 +63,9 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
         buttonPanel.add(runPauseButton);
 
 //        // --- Timer Setup ---
-//        int delay = 100; // 1000 milliseconds = 1 second
-//        // 'this' refers to the current class instance which implements ActionListener
-//        timer = new Timer(delay, this);
-//        timer.start();
+        int delay = 100; // 1000 milliseconds = 1 second
+        // 'this' refers to the current class instance which implements ActionListener
+        timer = new Timer(delay, this);
 
          /* Use a GridLayout with 4 rows and 1 column, and add all the
           components that have been created to the panel. */
@@ -82,6 +83,7 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
         setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
 
         new Thread(this).start();
+        timer.start();
 
     } // end constructor
 
@@ -98,16 +100,11 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
             } else {  // Animation is paused.  Start it running.
                 status = GO;
                 runPauseButton.setText("Pause");
-                // --- Timer Setup ---
-                int delay = 100; // 1000 milliseconds = 1 second
-                // 'this' refers to the current class instance which implements ActionListener
-                timer = new Timer(delay, this);
-                timer.start(); //TODO: Do I need a timer? If so, where is it called?
-                // TODO: Where is the timer set up, constructor or method?
             }
-
         }
         notify();
+        piEstimateLabel.setText(" Current Estimate:  " + estimateForPI);
+        countLabel.setText(" Number of trials: " + this.trialCount);
     }
 
 //x`
@@ -119,11 +116,11 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
             runPauseButton.setText("Run");
             status = PAUSE;
             checkStatus(); // Returns only when user has clicked "Run"
-            try {
-                trialGenerator();
-            } catch (IllegalStateException _) {
+//            try {
+            trialGenerator();
+//            } catch (IllegalStateException _) {
 
-            }
+//            }
         }
     }
 
@@ -156,9 +153,9 @@ public class PIApproxGUI extends JPanel implements Runnable, ActionListener {
                 inCircleCount++;
         }
         estimateForPI = 4 * ((double) inCircleCount / this.trialCount);
-        piEstimateLabel.setText(" Current Estimate:  " + estimateForPI);
-        countLabel.setText(" Number of trials: " + this.trialCount);
-        checkStatus();
+//        piEstimateLabel.setText(" Current Estimate:  " + estimateForPI);
+//        countLabel.setText(" Number of trials: " + this.trialCount);
+//        checkStatus();
     }
 
     /**
