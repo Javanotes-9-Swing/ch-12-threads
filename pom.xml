@@ -20,7 +20,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.2.0</version> <!-- Use a recent version -->
                 <configuration>
-                    <mainClass>exercise6.PIApproxGUI</mainClass>
+                    <mainClass>exercise6.EstimatePi_3</mainClass>
 <!--                    <mainClass>demos.MultiprocessingDemo2</mainClass>-->
                     <!-- Optional: Add arguments if your main method accepts them -->
                     <arguments>
